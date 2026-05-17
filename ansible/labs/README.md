@@ -42,3 +42,7 @@ Omit --global to set the identity only in this repository.
 
 git config --global user.email "rgranier@gmail.com"
 git config --global user.name "Randall Alta3"
+
+## Setup Lab 
+
+bash ~/px/scripts/full-setup.sh

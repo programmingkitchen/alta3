@@ -92,3 +92,9 @@ Host gitlab.com
   IdentityFile ~/.ssh/id_rsa_gitlab
   user git
   ```
+
+### Set up git config
+
+
+student@bchd:~/alta3$ git config --global user.email "rgranier@gmail.com"
+student@bchd:~/alta3$ git config --global user.name "Randall Alta3"

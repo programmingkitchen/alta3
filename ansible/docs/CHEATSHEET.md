@@ -1,5 +1,17 @@
 # Common Cheat Sheet Commands
 
+## Source Control 
+
+```bash
+cd ~/mycode
+git status
+git add /home/student/mycode/*
+git commit -m "First playbook"
+git push origin
+cd ~/
+```
+
+
 ## Setup
 
 **Initialize lab environment:**
@@ -49,4 +61,13 @@ ansible-inventory -i ~/test_inventory1.ini --host fry
 inventory = /home/student/test_inventory1.ini
 ```
 
- 
+- The file ansible.cfg will be searched for in the following order. If a file is found, Ansible will ignore any remaining sources:
+
+1. The environmental variable ```ANSIBLE_CONFIG``` (environment variable if set)
+2. The file `ansible.cfg` (in the current directory)
+3. `~/.ansible.cfg` (in the home directory)
+4. `/etc/ansible/ansible.cfg` (last location checked)
+
+### Key config parameters
+
+

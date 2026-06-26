@@ -1,0 +1,38 @@
+CTYPE html>
+<html>
+    <head>
+        <title>My Email List</title>
+        <!--styling for a table is a good case for internal/external styling-->
+        <style>
+            table {
+        border-collapse: collapse;
+            }
+
+            th, td {
+                border: 1px solid black;
+                padding: 8px;
+            }
+        </style>
+    </head>
+    <body style="color: white; background-color: grey">
+        <h2 style="color: blue">My Email List as a table</h2>
+        <table style="color: white; border-collapse: collapse;">
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+            </tr>
+            {% for entry in email_list %}
+            <tr>
+                <td>{{ entry[0] }}</td>
+                <td>{{ entry[1] }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+        <h2 style="color: green">My Email List as an unordered list</h2>
+        <ul>
+        {% for entry in email_list %}
+        <li><b>{{ entry[0] }}</b> at <b>{{ entry[1] }}</b></li>
+        {% endfor %}
+        </ul>
+    </body>
+</html>

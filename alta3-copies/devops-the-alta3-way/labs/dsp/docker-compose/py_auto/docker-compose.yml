@@ -1,0 +1,15 @@
+version: '3'
+services:
+  myapp:
+    build: .
+    environment:
+      - MY_VARIABLE=Alta3
+    ports:
+      - 2224:2224                   # our application was already set to run on 2224, so we can do the same within the container. The first 2224 is the port on our local host, so we can render to aux1
+    depends_on:
+      - test                        # lets our Docker Compose file know that we are waiting for some tests. 
+  test:
+    build: .
+    environment:
+      - MY_VARIABLE=my_test_value   # this is the "test value" for our variable. 
+    command: pytest                 # we still need to create a test

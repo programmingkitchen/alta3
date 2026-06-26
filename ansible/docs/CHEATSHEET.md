@@ -70,4 +70,26 @@ inventory = /home/student/test_inventory1.ini
 
 ### Key config parameters
 
-
+[defaults]
+retry_files_enabled
+host_key_checking
+inventory
+display_skipped_hosts
+forks
+timeout
+valut_password_file
+private_key_file
+remote_user
+#library
+#module_utils
+#remote_tmp
+#local_tmp
+#forks
+#poll_interval
+#sudo_user
+#ask_sudo_pass
+#ask_pass
+#transport
+#remote_port
+#module_lang
+#module_set_locale

@@ -1,6 +1,9 @@
-# alta3 training and code
+# ALTA 3 TRAINING AND CODE
 
-## Rebuild 5/17/26
-## Notes from 5/16/26
+## Revision history
 
-- From Alta3 set up new branch 
+| Date | Details |
+| ---- | --- |
+| 2026-06-29 | Develop docs for setting up Docker network lab.|
+| 2026-05-17 | Repository rebuild. |
+| 2026-05-16 | From Alta3 set up new branch. |

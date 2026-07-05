@@ -1,0 +1,46 @@
+Host 10.*
+	StrictHostKeyChecking no
+	UserKnownHostsFile=/dev/null
+Host github.com
+  HostName github.com
+  IdentitiesOnly yes
+  IdentityFile ~/.ssh/id_alta3
+  user git
+
+Host gitlab.com
+  HostName gitlab.com
+  IdentitiesOnly yes
+  IdentityFile ~/.ssh/id_rsa_gitlab
+  user git
+# BEGIN ANSIBLE MANAGED BLOCK
+Host indy
+  Hostname indy
+  user indy
+  IdentityFile ~/.ssh/id_rsa
+  StrictHostKeyChecking no
+  UserKnownHostsFile=/dev/null
+Host bender
+  Hostname bender
+  user bender
+  IdentityFile ~/.ssh/id_rsa
+  StrictHostKeyChecking no
+  UserKnownHostsFile=/dev/null
+Host fry
+  Hostname fry
+  user fry
+  IdentityFile ~/.ssh/id_rsa
+  StrictHostKeyChecking no
+  UserKnownHostsFile=/dev/null
+Host zoidberg
+  Hostname zoidberg
+  user zoidberg
+  IdentityFile ~/.ssh/id_rsa
+  StrictHostKeyChecking no
+  UserKnownHostsFile=/dev/null
+Host farnsworth
+  Hostname farnsworth
+  user farnsworth
+  IdentityFile ~/.ssh/id_rsa
+  StrictHostKeyChecking no
+  UserKnownHostsFile=/dev/null
+# END ANSIBLE MANAGED BLOCK

@@ -1,0 +1,21 @@
+---
+- name: Demonstrate set_fact
+  hosts: localhost
+  tasks:
+    - name: Get the current date
+      command: date +"%Y-%m-%d"
+      register: result
+
+    - name: Set a fact for the current date
+      set_fact:
+        date_now: "{{ result.stdout }}"
+
+    - name: Create a directory with the current date
+      file:
+        path: "/tmp/newdir-{{ date_now }}"
+        state: directory
+
+    - name: Display the fact
+      debug:
+        msg: "Directory created with name: /tmp/newdir-{{ date_now }}"
+

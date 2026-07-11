@@ -1,0 +1,15 @@
+---
+- name: Demonstrate set_fact
+  hosts: localhost
+  tasks:
+    - name: Get the current date
+      command: date +"%Y-%m-%d"
+      register: result
+
+    - name: Display full output
+      debug:
+        var: result
+
+    - name: Display one line 
+      debug:
+        var: result.stdout

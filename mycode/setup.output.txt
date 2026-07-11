@@ -1,0 +1,58 @@
+1.52
+Cleaning up Containers...
+Containers Cleared!
+
+Assembling Planet Express team...
+
+c529ddd13d1db188d799c6808499a42bf64100538837cbef502dd2a3d843981d
+Building image for bender...
+sha256:774299e47768482ab58931418ab156ca418926dbb115624e0531e953badbacea
+Building image for fry...
+sha256:0b0ffc7157a27b7c86a94a3cd3890181923e8e1047f9079df9a061ffb8e5eded
+Building image for zoidberg...
+sha256:ea4c765456c91ad2acd1be620ee010a5c4ffdf892c7cf67f2477f65dcff3a2f1
+Building image for indy...
+sha256:0a155eb0982b7d0c2426938e3c3f8565e9ec75687bc175fb28004d04f72dff6d
+103293a6156f108b00dcd3a6ddb66a20140c996c5f98ceeebd8073ad7c2fb195
+24da1db6ae5254afd85c036d602cf642845c8b9a1d76d7bde8fc19e4a5984bb6
+613e5973c8616e1ae979203612df065c0612583790ef756dee42cf547f92359a
+107fd7a4135cb51cd6a4dd8217e3c02016bbe191f5513a92e8f9b79a1c2b339e
+b651f0b07dfbfc5caf00776bd22e253aac3ac3d5d8ccb7d1f6c7141e2f13a2d6
+Reading package lists...
+Building dependency tree...
+Reading state information...
+sshpass is already the newest version (1.09-1).
+0 upgraded, 0 newly installed, 0 to remove and 1 not upgraded.
+.ansible.cfg Updated (/home/student/.ansible.cfg)
+
+Inventory File Updated (/home/student/mycode/inv/dev/hosts)
+
+Nethosts Inventory File Updated (/home/student/mycode/inv/dev/nethosts)
+
+
+PLAY [Copy Public Keys] ********************************************************
+
+TASK [Set authorized key taken from file] **************************************
+changed: [zoidberg]
+changed: [indy]
+changed: [bender]
+changed: [fry]
+
+PLAY [Put dns and ssh in correct state] ****************************************
+
+TASK [Gathering Facts] *********************************************************
+ok: [localhost]
+
+TASK [update etc hosts] ********************************************************
+ok: [localhost]
+
+TASK [update student ssh config] ***********************************************
+ok: [localhost]
+
+PLAY RECAP *********************************************************************
+bender                     : ok=1    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+fry                        : ok=1    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+indy                       : ok=1    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+localhost                  : ok=3    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+zoidberg                   : ok=1    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+

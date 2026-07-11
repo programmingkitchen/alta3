@@ -1,0 +1,11 @@
+- name: Jurassic Park Tour 02
+  hosts: bender
+  vars:
+    dino_name: Velociraptor  # Overrides host variable
+    dino_food: "small mammals and lizards"
+    dino_direction: "to your right"
+  tasks:
+    - name: Announce the dinosaur
+      shell: |
+        echo "Our next stop will take us past the {{ dino_name }}. It loves eating {{ dino_food }}.
+        You should be able to see it if you look {{ dino_direction }}" >> /tmp/jurassicpark.txt

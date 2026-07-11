@@ -1,0 +1,54 @@
+# This is a comment
+
+# Server block for www.example.com
+server {
+    listen 80;
+    listen [::]:80;
+    server_name www.example.com;
+    root /var/www/example.com;
+    index index.html;
+
+    location / {
+        try_files $uri $uri/ =404;
+    }
+}
+
+# Server block for api.example.com
+server {
+    listen 80;
+    listen [::]:80;
+    server_name api.example.com;
+    root /var/www/api.example.com;
+    index index.php;
+
+    location / {
+        try_files $uri $uri/ /index.php?$args;
+    }
+
+    location ~ \.php$ {
+        fastcgi_pass unix:/run/php/php7.4-fpm.sock;
+        fastcgi_index index.php;
+        include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+    }
+}
+
+# Server block for blog.example.com
+server {
+    listen 80;
+    listen [::]:80;
+    server_name blog.example.com;
+    root /var/www/blog.example.com;
+    index index.html index.php;
+
+    location / {
+        try_files $uri $uri/ /index.php?$args;
+    }
+
+    location ~ \.php$ {
+        fastcgi_pass unix:/run/php/php7.4-fpm.sock;
+        fastcgi_index index.php;
+        include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+    }
+}

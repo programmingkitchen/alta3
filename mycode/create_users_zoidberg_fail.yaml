@@ -1,0 +1,11 @@
+- hosts: zoidberg
+  become: true
+  
+  tasks:
+    - name: Try to create multiple users (incorrect)
+      user:
+        name:
+          - biff
+          - george
+        state: present
+

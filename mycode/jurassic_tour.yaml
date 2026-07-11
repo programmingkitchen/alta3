@@ -1,0 +1,8 @@
+- name: Jurassic Park Tour
+  hosts: bender
+  tasks:
+    - name: Announce the dinosaur
+      shell: |
+        echo "Our next stop will take us past the {{ dino_name }}. It loves eating {{ dino_food }}.
+        You should be able to see it if you look {{ dino_direction }}" >> /tmp/jurassicpark.txt
+

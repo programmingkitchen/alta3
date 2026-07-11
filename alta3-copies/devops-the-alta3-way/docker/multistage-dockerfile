@@ -1,0 +1,54 @@
+# Start with a Debian container which assigned the name "builder" with the AS command
+# It is typical to use "builder" as the name for a throw-way temporary container
+FROM golang:1.14.4-stretch AS builder
+
+# Add metadata info
+LABEL maintainer="Free5GC <support@free5gc.org>"
+
+# Install dependencies into builder container
+RUN apt-get update \
+    && apt-get -y install gcc cmake autoconf libtool pkg-config 
+    && apt-get -y libmnl-dev libyaml-dev apt-transport-https ca-certificates \
+    && curl -sL https://deb.nodesource.com/setup_10.x | bash - \
+    && curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - \
+    && echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list \
+    && apt-get update \
+    && apt-get install -y nodejs yarn
+
+# Clean apt cache inside builder container
+RUN apt-get clean
+
+# Clone Free5GC source code into the builder container
+# FYI: this will compile actual 5G control system binaries.
+# Just in case any of you want to become a 5G telephone system carrier :)
+RUN cd $GOPATH/src \
+    && git clone --recursive -b v3.0.5 -j `nproc` https://github.com/free5gc/free5gc.git
+
+# Compile the binaries inside the builder container
+RUN cd $GOPATH/src/free5gc \
+    && make all
+
+# Download the Alpine container. 
+#   (Both builder and alpine are now available to the dockerfile)
+FROM alpine
+
+# Alternative to above: Use the scratch container for a smaller footprint.
+# FROM scratch
+
+# Create the working directory in the alpine container
+WORKDIR /free5gc
+RUN mkdir -p config/ support/TLS/ public
+
+# Copy executables from builder into the alpine container
+COPY --from=builder /go/src/free5gc/bin/* ./
+COPY --from=builder /go/src/free5gc/NFs/upf/build/bin/* ./
+COPY --from=builder /go/src/free5gc/webconsole/bin/webconsole ./webui
+
+# Copy static files from builder into the alpine container
+COPY --from=builder /go/src/free5gc/webconsole/public ./public
+
+# Copy linked libs from builder into the alpine container
+COPY --from=builder /go/src/free5gc/NFs/upf/build/updk/src/third_party/libgtp5gnl/lib/libgtp5gnl.so.0 ./
+COPY --from=builder /go/src/free5gc/NFs/upf/build/utlt_logger/liblogger.so ./
+
+# The alpine container now contains all its base files, plus the 5G compiled binaries.

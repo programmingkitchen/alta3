@@ -1,0 +1,10 @@
+- hosts: fry
+  tasks:
+    - name: Install packages
+      apt:
+        name:
+          - sl
+          - cmatrix
+        state: present
+      become: true
+

@@ -1,0 +1,19 @@
+---
+- name: Demonstrate register
+  hosts: zoidberg
+  tasks:
+    - name: Install sl
+      apt:
+        name: sl
+        state: present
+        update_cache: yes
+      register: apt_result
+      become: true
+
+    - name: Display full output
+      debug:
+        var: apt_result
+
+    - name: Display specific parts of the output
+      debug:
+        msg: "The task changed: {{ apt_result.changed }}"

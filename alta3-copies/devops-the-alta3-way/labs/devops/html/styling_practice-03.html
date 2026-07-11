@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Styling Practice</title>
+    <link rel="stylesheet" href="{{url_for('static', filename='styles.css') }}"> ## NEW: The `rel` attribute defines the relationship to the linked document. 
+                                                                                     ##      The "href" actually calls a Flask module called `url_for`.
+ </head>
+<body>
+    <h1>Welcome to My Site</h1>
+    <div id="links_div">
+        <h2>Make me blue.</h2>
+        <p>Make me red.</p>
+        <a class="link" href="https://www.example.com">Learn More</a>
+        <a href="https://alta3.com">Contact Us</a>
+    </div>
+    <div class="list_div">
+        <ul>
+            <li>Item 1</li>
+            <li>Item 2</li>
+            <li>Item 3</li>
+        </ul>
+    </div>
+</body>
+</html>

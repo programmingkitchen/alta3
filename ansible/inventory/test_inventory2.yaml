@@ -1,0 +1,24 @@
+all:
+  children:
+    planetexpress:
+      hosts:
+        fry:
+          ansible_host: 10.10.2.4
+          ansible_user: fry
+          ansible_python_interpreter: /usr/bin/python3
+          fileuser: fry
+        farnsworth:
+          ansible_host: 10.10.2.6
+          ansible_user: farnsworth
+          ansible_ssh_pass: alta3
+          fileuser: farnsworth
+        bender:
+          ansible_host: 10.10.2.3
+          ansible_user: bender
+          ansible_python_interpreter: /usr/bin/python3
+          fileuser: bender
+        zoidberg:
+          ansible_host: 10.10.2.5
+          ansible_user: zoidberg
+          ansible_python_interpreter: /usr/bin/python3
+          fileuser: zoidberg

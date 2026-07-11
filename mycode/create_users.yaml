@@ -1,0 +1,20 @@
+- hosts: bender
+  become: true
+
+  vars:
+    delorean:
+      - { name: 'marty', shell: '/bin/bash' }
+      - { name: 'doc', shell: '/bin/zsh' }
+
+  tasks:
+    - name: Create users
+      user:
+        name: "{{ item.name }}"   # look at the value of "name" above
+        shell: "{{ item.shell }}" # look at the value of "shell" above
+        state: present
+      loop: "{{ delorean }}"
+
+    - name: Debug user details
+      debug:
+        msg: "Created user {{ item.name }} with shell {{ item.shell }}"
+      loop: "{{ delorean }}"

@@ -1,0 +1,42 @@
+---
+- name: Copy a directory recursively without deleting extra destination files
+  hosts: all
+  gather_facts: false
+  vars_files:
+    - vars/vars.yml
+
+  tasks:
+    - name: Validate source and destination values
+      ansible.builtin.assert:
+        that:
+          - source_dir | length > 0
+          - dest_dir | length > 0
+          - source_dir != dest_dir
+        fail_msg: source_dir and dest_dir must be set and must be different.
+
+    - name: Check source directory on control node
+      ansible.builtin.stat:
+        path: "{{ source_dir }}"
+      register: source_dir_stat
+      delegate_to: localhost
+      run_once: true
+
+    - name: Fail if source directory does not exist on control node
+      ansible.builtin.assert:
+        that:
+          - source_dir_stat.stat.exists
+          - source_dir_stat.stat.isdir
+        fail_msg: "Source directory does not exist or is not a directory: {{ source_dir }}"
+      run_once: true
+
+    - name: Ensure destination directory exists on target host
+      ansible.builtin.file:
+        path: "{{ dest_dir }}"
+        state: directory
+        mode: "0755"
+
+    - name: Recursively copy source contents to destination
+      ansible.builtin.copy:
+        src: "{{ source_dir }}/"
+        dest: "{{ dest_dir }}/"
+        mode: preserve

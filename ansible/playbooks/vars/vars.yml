@@ -13,3 +13,7 @@ commit_message: "Update files from Ansible automation"
 
 git_user_name: "Your Name"
 git_user_email: "you@example.com"
+
+# Directory copy variables used by copy-dir.yml
+source_dir: "/tmp/source_dir"
+dest_dir: "/tmp/target_dir"

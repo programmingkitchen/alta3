@@ -1,1 +1,3 @@
 alias setup='bash ~/px/scripts/full-setup.sh'
+alias syc='/home/student/alta3/scripts/copywrapper.sh'
+alias wrk='cd /home/student/mycode'

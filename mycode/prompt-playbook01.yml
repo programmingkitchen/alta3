@@ -8,7 +8,7 @@
       prompt: "What is your password?"
       private: yes
       encrypt: "sha512_crypt"
-      confirm: yes
+        #confirm: yes
       salt_size: 7
       default: "qwerty"
 

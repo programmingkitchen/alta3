@@ -11,18 +11,24 @@
         dest: "{{ repo_dest }}"
         version: "{{ default_branch }}"
         update: true
+      tags:
+        - clone
 
     - name: Configure git user name
       ansible.builtin.command:
         cmd: git config user.name "{{ git_user_name }}"
       args:
         chdir: "{{ repo_dest }}"
+      tags:
+        - configuration
 
     - name: Configure git user email
       ansible.builtin.command:
         cmd: git config user.email "{{ git_user_email }}"
       args:
         chdir: "{{ repo_dest }}"
+      tags:
+        - configuration
 
     - name: Check if remote branch already exists
       ansible.builtin.command:
@@ -31,6 +37,10 @@
         chdir: "{{ repo_dest }}"
       register: remote_branch_check
       changed_when: false
+      tags:
+        - make_branch
+        - switch_pull
+        - switch_stage
 
     - name: Create or switch to local branch tracking remote branch
       ansible.builtin.command:
@@ -38,6 +48,10 @@
       args:
         chdir: "{{ repo_dest }}"
       when: remote_branch_check.stdout | length > 0
+      tags:
+        - make_branch
+        - switch_pull
+        - switch_stage
 
     - name: Create or switch to local branch
       ansible.builtin.command:
@@ -45,6 +59,10 @@
       args:
         chdir: "{{ repo_dest }}"
       when: remote_branch_check.stdout | length == 0
+      tags:
+        - make_branch
+        - switch_pull
+        - switch_stage
 
     - name: Pull latest code from branch
       ansible.builtin.command:
@@ -52,12 +70,16 @@
       args:
         chdir: "{{ repo_dest }}"
       when: remote_branch_check.stdout | length > 0
+      tags:
+        - switch_pull
 
     - name: Add files to staging area
       ansible.builtin.command:
         cmd: git add {{ files_to_stage }}
       args:
         chdir: "{{ repo_dest }}"
+      tags:
+        - switch_stage
 
     - name: Check whether staged changes exist
       ansible.builtin.command:
@@ -67,17 +89,52 @@
       register: staged_changes
       failed_when: staged_changes.rc not in [0, 1]
       changed_when: staged_changes.rc == 1
+      tags:
+        - commit
+
+    - name: Prompt for commit message when not provided
+      ansible.builtin.pause:
+        prompt: "Enter commit message"
+      register: commit_message_prompt
+      when:
+        - staged_changes.rc == 1
+        - commit_message | default('') | trim | length == 0
+      tags:
+        - commit
+
+    - name: Build effective commit message
+      ansible.builtin.set_fact:
+        commit_message_effective: >-
+          {{ (commit_message | default('') | trim)
+             if (commit_message | default('') | trim | length > 0)
+             else (commit_message_prompt.user_input | trim) }}
+      when: staged_changes.rc == 1
+      tags:
+        - commit
+
+    - name: Validate effective commit message is not empty
+      ansible.builtin.assert:
+        that:
+          - commit_message_effective | length > 0
+        fail_msg: Commit message cannot be empty.
+      when: staged_changes.rc == 1
+      tags:
+        - commit
 
     - name: Commit staged changes
       ansible.builtin.command:
-        cmd: git commit -m "{{ commit_message }}"
+        cmd: git commit -m "{{ commit_message_effective }}"
       args:
         chdir: "{{ repo_dest }}"
       when: staged_changes.rc == 1
+      tags:
+        - commit
 
     - name: Push branch to remote
       ansible.builtin.command:
         cmd: git push --set-upstream {{ remote_name }} {{ branch_name }}
       args:
         chdir: "{{ repo_dest }}"
+      tags:
+        - push
 

@@ -29,6 +29,22 @@
       tags:
         - clone_repo_dir
 
+    - name: Print repo_worktree for clone_repo_dir workflow
+      ansible.builtin.debug:
+        msg:
+          - "repo_url: {{ repo_url }}"
+          - "repo_parent_dir: {{ repo_parent_dir }}"
+          - "repo_name: {{ repo_name }}"
+          - "repo_dest: {{ repo_dest }}"
+          - "default_branch: {{ default_branch }}"
+          - "remote_name: {{ remote_name }}"
+          - "branch_name: {{ branch_name }}"
+          - "files_to_stage: {{ files_to_stage }}"
+          - "commit_message: {{ commit_message | default('') }}"
+          - "repo_worktree: {{ repo_worktree }}"
+      tags:
+        - clone_repo_dir
+
     - name: Ensure destination directory exists for root clone
       ansible.builtin.file:
         path: "{{ repo_dest }}"

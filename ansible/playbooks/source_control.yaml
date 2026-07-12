@@ -3,22 +3,59 @@
   gather_facts: false
   vars_files:
     - vars/vars.yml
+  vars:
+    repo_name: "{{ repo_url | regex_replace('.*/', '') | regex_replace('\\.git$', '') }}"
 
   tasks:
-    - name: Ensure local repository is cloned and up to date
-      ansible.builtin.git:
-        repo: "{{ repo_url }}"
-        dest: "{{ repo_dest }}"
-        version: "{{ default_branch }}"
-        update: true
+    - name: Ensure clone parent directory exists
+      ansible.builtin.file:
+        path: "{{ repo_parent_dir }}"
+        state: directory
+        mode: "0755"
       tags:
-        - clone
+        - clone_repo_dir
+
+    - name: Clone repository into parent directory using repo name
+      ansible.builtin.command:
+        cmd: git clone {{ repo_url }}
+      args:
+        chdir: "{{ repo_parent_dir }}"
+      tags:
+        - clone_repo_dir
+
+    - name: Set worktree path for clone_repo_dir workflow
+      ansible.builtin.set_fact:
+        repo_worktree: "{{ repo_parent_dir }}/{{ repo_name }}"
+      tags:
+        - clone_repo_dir
+
+    - name: Ensure destination directory exists for root clone
+      ansible.builtin.file:
+        path: "{{ repo_dest }}"
+        state: directory
+        mode: "0755"
+      tags:
+        - clone_into_root
+
+    - name: Clone repository into current directory root
+      ansible.builtin.command:
+        cmd: git clone {{ repo_url }} .
+      args:
+        chdir: "{{ repo_dest }}"
+      tags:
+        - clone_into_root
+
+    - name: Set worktree path for clone_into_root workflow
+      ansible.builtin.set_fact:
+        repo_worktree: "{{ repo_dest }}"
+      tags:
+        - clone_into_root
 
     - name: Read effective git configuration in repository
       ansible.builtin.command:
         cmd: git config --list
       args:
-        chdir: "{{ repo_dest }}"
+        chdir: "{{ repo_worktree | default(repo_dest) }}"
       register: git_config_list
       changed_when: false
       tags:
@@ -28,7 +65,7 @@
       ansible.builtin.command:
         cmd: git branch --all --verbose
       args:
-        chdir: "{{ repo_dest }}"
+        chdir: "{{ repo_worktree | default(repo_dest) }}"
       register: git_branch_list
       changed_when: false
       tags:
@@ -38,7 +75,7 @@
       ansible.builtin.command:
         cmd: git remote -v
       args:
-        chdir: "{{ repo_dest }}"
+        chdir: "{{ repo_worktree | default(repo_dest) }}"
       register: git_remote_list
       changed_when: false
       tags:
@@ -57,7 +94,7 @@
       ansible.builtin.command:
         cmd: git ls-remote --heads {{ remote_name }} {{ branch_name }}
       args:
-        chdir: "{{ repo_dest }}"
+        chdir: "{{ repo_worktree | default(repo_dest) }}"
       register: remote_branch_check
       changed_when: false
       tags:
@@ -69,7 +106,7 @@
       ansible.builtin.command:
         cmd: git checkout -B {{ branch_name }} {{ remote_name }}/{{ branch_name }}
       args:
-        chdir: "{{ repo_dest }}"
+        chdir: "{{ repo_worktree | default(repo_dest) }}"
       when: remote_branch_check.stdout | length > 0
       tags:
         - make_branch
@@ -80,7 +117,7 @@
       ansible.builtin.command:
         cmd: git checkout -B {{ branch_name }}
       args:
-        chdir: "{{ repo_dest }}"
+        chdir: "{{ repo_worktree | default(repo_dest) }}"
       when: remote_branch_check.stdout | length == 0
       tags:
         - make_branch
@@ -91,7 +128,7 @@
       ansible.builtin.command:
         cmd: git pull --ff-only {{ remote_name }} {{ branch_name }}
       args:
-        chdir: "{{ repo_dest }}"
+        chdir: "{{ repo_worktree | default(repo_dest) }}"
       when: remote_branch_check.stdout | length > 0
       tags:
         - switch_pull
@@ -100,7 +137,7 @@
       ansible.builtin.command:
         cmd: git add {{ files_to_stage }}
       args:
-        chdir: "{{ repo_dest }}"
+        chdir: "{{ repo_worktree | default(repo_dest) }}"
       tags:
         - switch_stage
 
@@ -108,7 +145,7 @@
       ansible.builtin.command:
         cmd: git diff --cached --quiet
       args:
-        chdir: "{{ repo_dest }}"
+        chdir: "{{ repo_worktree | default(repo_dest) }}"
       register: staged_changes
       failed_when: staged_changes.rc not in [0, 1]
       changed_when: staged_changes.rc == 1
@@ -148,7 +185,7 @@
       ansible.builtin.command:
         cmd: git commit -m "{{ commit_message_effective }}"
       args:
-        chdir: "{{ repo_dest }}"
+        chdir: "{{ repo_worktree | default(repo_dest) }}"
       when: staged_changes.rc == 1
       tags:
         - commit
@@ -157,7 +194,7 @@
       ansible.builtin.command:
         cmd: git push --set-upstream {{ remote_name }} {{ branch_name }}
       args:
-        chdir: "{{ repo_dest }}"
+        chdir: "{{ repo_worktree | default(repo_dest) }}"
       tags:
         - push
 

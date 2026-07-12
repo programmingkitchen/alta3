@@ -1,5 +1,6 @@
 repo_url: "git@github.com:programmingkitchen/alta3.git"
 repo_dest: "/home/student/test/"
+repo_parent_dir: "/home/student"
 
 # Branch used for checkout/create, pull, and push.
 branch_name: "feature/update-files"

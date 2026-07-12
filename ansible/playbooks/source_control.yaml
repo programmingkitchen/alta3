@@ -14,19 +14,42 @@
       tags:
         - clone
 
-    - name: Configure git user name
+    - name: Read effective git configuration in repository
       ansible.builtin.command:
-        cmd: git config user.name "{{ git_user_name }}"
+        cmd: git config --list
       args:
         chdir: "{{ repo_dest }}"
+      register: git_config_list
+      changed_when: false
       tags:
         - configuration
 
-    - name: Configure git user email
+    - name: Read branch information in repository
       ansible.builtin.command:
-        cmd: git config user.email "{{ git_user_email }}"
+        cmd: git branch --all --verbose
       args:
         chdir: "{{ repo_dest }}"
+      register: git_branch_list
+      changed_when: false
+      tags:
+        - configuration
+
+    - name: Read remote information in repository
+      ansible.builtin.command:
+        cmd: git remote -v
+      args:
+        chdir: "{{ repo_dest }}"
+      register: git_remote_list
+      changed_when: false
+      tags:
+        - configuration
+
+    - name: Show git repository configuration summary
+      ansible.builtin.debug:
+        msg:
+          - "git config --list: {{ git_config_list.stdout_lines }}"
+          - "git branch --all --verbose: {{ git_branch_list.stdout_lines }}"
+          - "git remote -v: {{ git_remote_list.stdout_lines }}"
       tags:
         - configuration
 

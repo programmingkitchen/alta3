@@ -1,9 +1,9 @@
 repo_url: "git@github.com:programmingkitchen/alta3.git"
-repo_dest: "/home/student/test/foo"
-repo_parent_dir: "/home/student/test/"
+repo_dest: "/home/student/alta3/"
+repo_parent_dir: "/home/student/alta3/"
 
 # Branch used for checkout/create, pull, and push.
-branch_name: "feat/test"
+branch_name: "feat/lab23"
 
 # Branch used when initially cloning the repository.
 default_branch: "main"

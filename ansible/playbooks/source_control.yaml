@@ -15,11 +15,20 @@
       tags:
         - clone_repo_dir
 
+    - name: Check whether repo already exists in parent clone path
+      ansible.builtin.stat:
+        path: "{{ repo_parent_dir }}/{{ repo_name }}/.git"
+      register: repo_dir_clone_git
+      changed_when: false
+      tags:
+        - clone_repo_dir
+
     - name: Clone repository into parent directory using repo name
       ansible.builtin.command:
         cmd: git clone {{ repo_url }}
       args:
         chdir: "{{ repo_parent_dir }}"
+      when: not repo_dir_clone_git.stat.exists
       tags:
         - clone_repo_dir
 
@@ -53,11 +62,20 @@
       tags:
         - clone_into_root
 
+    - name: Check whether repo already exists in root clone path
+      ansible.builtin.stat:
+        path: "{{ repo_dest }}/.git"
+      register: repo_root_clone_git
+      changed_when: false
+      tags:
+        - clone_into_root
+
     - name: Clone repository into current directory root
       ansible.builtin.command:
         cmd: git clone {{ repo_url }} .
       args:
         chdir: "{{ repo_dest }}"
+      when: not repo_root_clone_git.stat.exists
       tags:
         - clone_into_root
 
@@ -66,6 +84,62 @@
         repo_worktree: "{{ repo_dest }}"
       tags:
         - clone_into_root
+
+    - name: Build candidate repo worktree paths
+      ansible.builtin.set_fact:
+        repo_worktree_candidates:
+          - "{{ repo_dest | regex_replace('/+$', '') }}"
+          - "{{ (repo_parent_dir | regex_replace('/+$', '')) ~ '/' ~ repo_name }}"
+      when: repo_worktree is not defined
+      tags:
+        - configuration
+        - make_branch
+        - switch_pull
+        - switch_stage
+        - commit
+        - push
+
+    - name: Check candidate repo locations for existing .git directory
+      ansible.builtin.stat:
+        path: "{{ item }}/.git"
+      loop: "{{ repo_worktree_candidates }}"
+      register: repo_worktree_candidate_stats
+      changed_when: false
+      when: repo_worktree is not defined
+      tags:
+        - configuration
+        - make_branch
+        - switch_pull
+        - switch_stage
+        - commit
+        - push
+
+    - name: Select repo worktree from detected repository path
+      ansible.builtin.set_fact:
+        repo_worktree: "{{ (repo_worktree_candidate_stats.results | selectattr('stat.exists') | map(attribute='item') | list | first) | default('') }}"
+      when: repo_worktree is not defined
+      tags:
+        - configuration
+        - make_branch
+        - switch_pull
+        - switch_stage
+        - commit
+        - push
+
+    - name: Ensure repository exists before running git workflows
+      ansible.builtin.assert:
+        that:
+          - repo_worktree | length > 0
+        fail_msg: >-
+          No git repository found at repo_dest ({{ repo_dest }}) or repo_parent_dir/repo_name
+          ({{ repo_parent_dir }}/{{ repo_name }}). Run clone workflow first or fix vars.
+      tags:
+        - configuration
+        - make_branch
+        - switch_pull
+        - switch_stage
+        - commit
+        - push
 
     - name: Read effective git configuration in repository
       ansible.builtin.command:
@@ -117,6 +191,8 @@
         - make_branch
         - switch_pull
         - switch_stage
+        - commit
+        - push
 
     - name: Create or switch to local branch tracking remote branch
       ansible.builtin.command:
@@ -128,6 +204,8 @@
         - make_branch
         - switch_pull
         - switch_stage
+        - commit
+        - push
 
     - name: Create or switch to local branch
       ansible.builtin.command:
@@ -139,6 +217,8 @@
         - make_branch
         - switch_pull
         - switch_stage
+        - commit
+        - push
 
     - name: Pull latest code from branch
       ansible.builtin.command:

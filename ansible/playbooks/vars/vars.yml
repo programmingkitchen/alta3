@@ -3,7 +3,7 @@ repo_dest: "/home/student/test/foo"
 repo_parent_dir: "/home/student/test/"
 
 # Branch used for checkout/create, pull, and push.
-branch_name: "feature/update-files"
+branch_name: "feat/test"
 
 # Branch used when initially cloning the repository.
 default_branch: "main"

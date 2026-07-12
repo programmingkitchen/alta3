@@ -1,0 +1,5 @@
+# TMUX cheats
+
+
+CTRL B
+

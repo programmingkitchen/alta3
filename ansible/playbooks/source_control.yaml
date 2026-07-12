@@ -141,6 +141,35 @@
         - commit
         - push
 
+    - name: Read current branch in repository
+      ansible.builtin.command:
+        cmd: git branch --show-current
+      args:
+        chdir: "{{ repo_worktree | default(repo_dest) }}"
+      register: current_branch
+      changed_when: false
+      tags:
+        - make_branch
+        - switch_pull
+        - switch_stage
+        - commit
+        - push
+
+    - name: Check whether local target branch exists
+      ansible.builtin.command:
+        cmd: git show-ref --verify --quiet refs/heads/{{ branch_name }}
+      args:
+        chdir: "{{ repo_worktree | default(repo_dest) }}"
+      register: local_branch_exists
+      changed_when: false
+      failed_when: local_branch_exists.rc not in [0, 1]
+      tags:
+        - make_branch
+        - switch_pull
+        - switch_stage
+        - commit
+        - push
+
     - name: Read effective git configuration in repository
       ansible.builtin.command:
         cmd: git config --list
@@ -177,6 +206,9 @@
           - "git config --list: {{ git_config_list.stdout_lines }}"
           - "git branch --all --verbose: {{ git_branch_list.stdout_lines }}"
           - "git remote -v: {{ git_remote_list.stdout_lines }}"
+          - "current branch: {{ current_branch.stdout | default('') }}"
+          - "target branch: {{ branch_name }}"
+          - "local target branch exists: {{ local_branch_exists.rc | default(1) == 0 }}"
       tags:
         - configuration
 
@@ -194,12 +226,14 @@
         - commit
         - push
 
-    - name: Create or switch to local branch tracking remote branch
+    - name: Switch to existing local target branch
       ansible.builtin.command:
-        cmd: git checkout -B {{ branch_name }} {{ remote_name }}/{{ branch_name }}
+        cmd: git switch {{ branch_name }}
       args:
         chdir: "{{ repo_worktree | default(repo_dest) }}"
-      when: remote_branch_check.stdout | length > 0
+      when:
+        - current_branch.stdout != branch_name
+        - local_branch_exists.rc == 0
       tags:
         - make_branch
         - switch_pull
@@ -207,12 +241,31 @@
         - commit
         - push
 
-    - name: Create or switch to local branch
+    - name: Create and track remote target branch
       ansible.builtin.command:
-        cmd: git checkout -B {{ branch_name }}
+        cmd: git switch --track -c {{ branch_name }} {{ remote_name }}/{{ branch_name }}
       args:
         chdir: "{{ repo_worktree | default(repo_dest) }}"
-      when: remote_branch_check.stdout | length == 0
+      when:
+        - current_branch.stdout != branch_name
+        - local_branch_exists.rc != 0
+        - remote_branch_check.stdout | length > 0
+      tags:
+        - make_branch
+        - switch_pull
+        - switch_stage
+        - commit
+        - push
+
+    - name: Create new local target branch when remote branch does not exist
+      ansible.builtin.command:
+        cmd: git switch -c {{ branch_name }}
+      args:
+        chdir: "{{ repo_worktree | default(repo_dest) }}"
+      when:
+        - current_branch.stdout != branch_name
+        - local_branch_exists.rc != 0
+        - remote_branch_check.stdout | length == 0
       tags:
         - make_branch
         - switch_pull
@@ -288,7 +341,7 @@
 
     - name: Push branch to remote
       ansible.builtin.command:
-        cmd: git push {{ remote_name }} HEAD
+        cmd: git push {{ remote_name }} HEAD:{{ branch_name }}
       args:
         chdir: "{{ repo_worktree | default(repo_dest) }}"
       tags:

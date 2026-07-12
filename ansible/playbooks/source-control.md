@@ -73,4 +73,6 @@ student@bchd:~/test/foo$
 
 ```bash
 ansible-playbook source_control.yaml --tags switch_stage,commit,push -e "branch_name=your-branch"
+
+ansible-playbook source_control.yaml --tags switch_stage,commit,push
 ```

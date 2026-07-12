@@ -1,5 +1,10 @@
 # SOURCE CONTROL: TEST CASES
 
+
+ansible-playbook /home/student/alta3/ansible/playbooks/source_control.yaml --tags switch_stage,commit,push -e "branch_name=your-branch"
+ansible-playbook /home/student/alta3/ansible/playbooks/source_control.yaml --tags switch_stage
+
+
 ## CLONE
 
 ### TAG: clone

@@ -288,7 +288,7 @@
 
     - name: Push branch to remote
       ansible.builtin.command:
-        cmd: git push --set-upstream {{ remote_name }} {{ branch_name }}
+        cmd: git push {{ remote_name }} HEAD
       args:
         chdir: "{{ repo_worktree | default(repo_dest) }}"
       tags:

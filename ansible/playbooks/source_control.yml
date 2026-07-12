@@ -220,13 +220,21 @@
 
     - name: Show git repository configuration summary
       ansible.builtin.debug:
-        msg:
-          - "git config --list: {{ git_config_list.stdout_lines }}"
-          - "git branch --all --verbose: {{ git_branch_list.stdout_lines }}"
-          - "git remote -v: {{ git_remote_list.stdout_lines }}"
-          - "current branch: {{ current_branch.stdout | default('') }}"
-          - "target branch: {{ branch_name }}"
-          - "local target branch exists: {{ local_branch_exists.rc | default(1) == 0 }}"
+        msg: |
+
+          ── git config --list ──────────────────────────────────────
+          {{ git_config_list.stdout }}
+
+          ── git branch --all --verbose ─────────────────────────────
+          {{ git_branch_list.stdout }}
+
+          ── git remote -v ──────────────────────────────────────────
+          {{ git_remote_list.stdout }}
+
+          ── status ─────────────────────────────────────────────────
+          current branch        : {{ current_branch.stdout | default('(none)') }}
+          target branch         : {{ branch_name }}
+          target exists locally : {{ local_branch_exists.rc | default(1) == 0 }}
       tags:
         - never
         - configuration

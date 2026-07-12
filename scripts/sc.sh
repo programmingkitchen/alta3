@@ -50,6 +50,10 @@ Options:
                     to list all valid tags with descriptions.
   -e <key=value>    Set or override an Ansible variable (may be repeated).
                     Example: -e branch_name=feat/my-feature
+  -m <message>      Commit message override. Sets commit_message for the run
+                    and suppresses the interactive prompt even when no default
+                    is defined in vars/vars.yml. Required when running the
+                    commit tag non-interactively.
   -p                Pretty output: use the Ansible yaml callback so multi-line
                     debug messages render with real newlines instead of \n.
                     Default is the standard Ansible JSON callback output.
@@ -72,7 +76,8 @@ Overridable variables (defaults come from vars/vars.yml):
 Examples:
   $(basename "$0") -t clone_repo_dir
   $(basename "$0") -t push -e branch_name=feat/lab24 -e commit_message="My commit"
-  $(basename "$0") -t commit -e commit_message="Add playbook"
+  $(basename "$0") -t commit -m "Add playbook"
+  $(basename "$0") -t commit -m "Add playbook" -p
   $(basename "$0") -t push -p              # pretty output
   $(basename "$0") -t            # lists all valid tags
   $(basename "$0") -h
@@ -110,13 +115,14 @@ is_valid_tag() {
 # ---------------------------------------------------------------------------
 ANSIBLE_TAG=""
 EXTRA_VARS=()
+COMMIT_MSG=""
 VERBOSITY=""
 CHECK_MODE=""
 INVENTORY=""
 PRETTY=false
 TAG_FLAG_SEEN=false
 
-while getopts ":t:e:pvCi:h" opt; do
+while getopts ":t:e:m:pvCi:h" opt; do
     case "${opt}" in
         t)
             TAG_FLAG_SEEN=true
@@ -124,6 +130,9 @@ while getopts ":t:e:pvCi:h" opt; do
             ;;
         e)
             EXTRA_VARS+=("${OPTARG}")
+            ;;
+        m)
+            COMMIT_MSG="${OPTARG}"
             ;;
         p)
             PRETTY=true
@@ -147,7 +156,7 @@ while getopts ":t:e:pvCi:h" opt; do
                 list_tags
                 exit 0
             fi
-            die "Option -${OPTARG} requires an argument."
+            die "Option -${OPTARG} requires an argument (e.g. -m \"your message\")."
             ;;
         \?)
             die "Unknown option: -${OPTARG}"
@@ -201,6 +210,10 @@ fi
 
 if [[ -n "${ANSIBLE_TAG}" ]]; then
     CMD+=(--tags "${ANSIBLE_TAG}")
+fi
+
+if [[ -n "${COMMIT_MSG}" ]]; then
+    CMD+=(-e "commit_message=${COMMIT_MSG}")
 fi
 
 for ev in "${EXTRA_VARS[@]}"; do

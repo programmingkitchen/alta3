@@ -213,7 +213,9 @@ if [[ -n "${ANSIBLE_TAG}" ]]; then
 fi
 
 if [[ -n "${COMMIT_MSG}" ]]; then
-    CMD+=(-e "commit_message=${COMMIT_MSG}")
+    # key=value format truncates on spaces; use JSON so the full string is passed
+    escaped="${COMMIT_MSG//\"/\\\"}"
+    CMD+=(-e "{\"commit_message\": \"${escaped}\"}")
 fi
 
 for ev in "${EXTRA_VARS[@]}"; do

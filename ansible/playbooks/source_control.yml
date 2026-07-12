@@ -220,6 +220,28 @@
         - never
         - configuration
 
+    - name: Read local branches (brief)
+      ansible.builtin.command:
+        cmd: git branch
+      args:
+        chdir: "{{ repo_worktree | default(repo_dest) }}"
+      register: git_local_branches_brief
+      changed_when: false
+      tags:
+        - never
+        - configuration
+
+    - name: Read remote branches (brief)
+      ansible.builtin.command:
+        cmd: git branch -r
+      args:
+        chdir: "{{ repo_worktree | default(repo_dest) }}"
+      register: git_remote_branches_brief
+      changed_when: false
+      tags:
+        - never
+        - configuration
+
     - name: Show git repository configuration summary
       ansible.builtin.debug:
         msg: |
@@ -232,6 +254,12 @@
 
           ── git remote -v ──────────────────────────────────────────
           {{ git_remote_list.stdout }}
+
+          ── Local Branches (brief) ─────────────────────────────
+          {{ git_local_branches_brief.stdout }}
+
+          ── Remote Branches (brief) ────────────────────────────
+          {{ git_remote_branches_brief.stdout }}
 
           ── status ─────────────────────────────────────────────────
           current branch        : {{ current_branch.stdout | default('(none)') }}

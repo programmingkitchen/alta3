@@ -156,6 +156,13 @@ fi
 # ---------------------------------------------------------------------------
 # Validate inputs
 # ---------------------------------------------------------------------------
+if [[ -z "${ANSIBLE_TAG}" ]]; then
+    usage
+    echo
+    list_tags
+    exit 1
+fi
+
 if [[ ! -f "${PLAYBOOK}" ]]; then
     die "Playbook not found: ${PLAYBOOK}"
 fi

@@ -163,6 +163,7 @@
       changed_when: false
       tags:
         - never
+        - configuration
         - make_branch
         - switch_pull
         - switch_stage
@@ -179,6 +180,7 @@
       failed_when: local_branch_exists.rc not in [0, 1]
       tags:
         - never
+        - configuration
         - make_branch
         - switch_pull
         - switch_stage

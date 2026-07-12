@@ -50,6 +50,9 @@ Options:
                     to list all valid tags with descriptions.
   -e <key=value>    Set or override an Ansible variable (may be repeated).
                     Example: -e branch_name=feat/my-feature
+  -p                Pretty output: use the Ansible yaml callback so multi-line
+                    debug messages render with real newlines instead of \n.
+                    Default is the standard Ansible JSON callback output.
   -v                Enable verbose Ansible output (-v). Repeat for more verbosity
                     (e.g. -vv, -vvv) — just pass -v multiple times.
   -C                Run in check mode (dry-run); no changes will be made.
@@ -70,6 +73,7 @@ Examples:
   $(basename "$0") -t clone_repo_dir
   $(basename "$0") -t push -e branch_name=feat/lab24 -e commit_message="My commit"
   $(basename "$0") -t commit -e commit_message="Add playbook"
+  $(basename "$0") -t push -p              # pretty output
   $(basename "$0") -t            # lists all valid tags
   $(basename "$0") -h
 EOF
@@ -109,9 +113,10 @@ EXTRA_VARS=()
 VERBOSITY=""
 CHECK_MODE=""
 INVENTORY=""
+PRETTY=false
 TAG_FLAG_SEEN=false
 
-while getopts ":t:e:vCi:h" opt; do
+while getopts ":t:e:pvCi:h" opt; do
     case "${opt}" in
         t)
             TAG_FLAG_SEEN=true
@@ -119,6 +124,9 @@ while getopts ":t:e:vCi:h" opt; do
             ;;
         e)
             EXTRA_VARS+=("${OPTARG}")
+            ;;
+        p)
+            PRETTY=true
             ;;
         v)
             VERBOSITY="${VERBOSITY}v"
@@ -212,5 +220,11 @@ fi
 # ---------------------------------------------------------------------------
 echo "Running: ${CMD[*]}"
 echo
+
+# Use the yaml stdout callback when -p is requested so multi-line debug output
+# renders with real newlines instead of JSON-escaped \n sequences.
+if [[ "${PRETTY}" == true ]]; then
+    export ANSIBLE_STDOUT_CALLBACK=yaml
+fi
 
 exec "${CMD[@]}"

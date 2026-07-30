@@ -1,0 +1,34 @@
+---
+- name: Example host group
+  hosts: localhost
+  become: true
+  gather_facts: false
+  tasks: []
+
+# The variables will only be available for this playbook and not globally
+- name: How to load variables from a file
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Show current user and working directory
+      ansible.builtin.shell: "whoami && pwd"
+      changed_when: false
+      register: identity
+
+    - name: Print command output
+      ansible.builtin.debug:
+        var: identity.stdout_lines
+
+- name: How to run commands in a specific directory
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: List files in /etc and assign to variable (no print)
+      ansible.builtin.shell: "ls -1"
+      args:
+        chdir: /etc
+      register: etc_files
+
+    - name: Show first few files
+      ansible.builtin.debug:
+        msg: "{{ etc_files.stdout_lines[:5] }}"

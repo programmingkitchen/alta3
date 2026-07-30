@@ -3,12 +3,14 @@
   hosts: localhost
   become: true
   gather_facts: false
+  tags: always
   tasks: []
 
 # The variables will only be available for this playbook and not globally
 - name: How to load variables from a file
   hosts: localhost
   gather_facts: false
+  tags: whoami
   tasks:
     - name: Show current user and working directory
       ansible.builtin.shell: "whoami && pwd"
@@ -22,6 +24,7 @@
 - name: How to run commands in a specific directory
   hosts: localhost
   gather_facts: false
+  tags: chdir
   tasks:
     - name: List files in /etc and assign to variable (no print)
       ansible.builtin.shell: "ls -1"

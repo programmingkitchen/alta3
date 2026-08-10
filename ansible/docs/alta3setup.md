@@ -95,6 +95,5 @@ Host gitlab.com
 
 ### Set up git config
 
-
 student@bchd:~/alta3$ git config --global user.email "rgranier@gmail.com"
 student@bchd:~/alta3$ git config --global user.name "Randall Alta3"

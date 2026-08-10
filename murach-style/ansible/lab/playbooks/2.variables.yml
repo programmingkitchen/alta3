@@ -1,0 +1,58 @@
+---
+- name: Example host group
+  hosts: localhost
+  become: true
+  gather_facts: false
+  tasks: []
+
+- name: How to define variables directly in a block
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Show block-scoped variables
+      block:
+        - name: Print inline variables
+          ansible.builtin.debug:
+            msg:
+              - "course_name={{ course_name }}"
+              - "target_env={{ target_env }}"
+      vars:
+        course_name: ansible-lab-inline
+        target_env: local
+
+
+# A robust loading of the vars files
+# The variables will only be available for this playbook and not globally
+- name: How to load variables from a file
+  hosts: localhost
+  gather_facts: false
+  vars:
+    vars_file_path: example_vars.yml
+  tasks:
+    - name: Check that vars file exists
+      ansible.builtin.stat:
+        path: "{{ vars_file_path }}"
+      register: vars_file_stat
+
+    - name: Ensure vars file exists
+      ansible.builtin.assert:
+        that:
+          - vars_file_stat.stat.exists
+        fail_msg: "Required variables file {{ vars_file_path }} was not found"
+
+    - name: Load variables from vars file
+      ansible.builtin.include_vars:
+        file: "{{ vars_file_path }}"
+
+    - name: Ensure required variables are loaded
+      ansible.builtin.assert:
+        that:
+          - course_name is defined
+          - target_env is defined
+        fail_msg: "Required keys are missing from {{ vars_file_path }}"
+
+    - name: Show loaded variables
+      ansible.builtin.debug:
+        msg:
+          - "course_name={{ course_name }}"
+          - "target_env={{ target_env }}"

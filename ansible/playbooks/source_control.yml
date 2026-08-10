@@ -1,0 +1,418 @@
+- name: Git source control workflow
+  hosts: localhost
+  gather_facts: false
+  vars_files:
+    - vars/vars.yml
+  vars:
+    repo_name: "{{ repo_url | regex_replace('.*/', '') | regex_replace('\\.git$', '') }}"
+
+  tasks:
+    - name: Ensure clone parent directory exists
+      ansible.builtin.file:
+        path: "{{ repo_parent_dir }}"
+        state: directory
+        mode: "0755"
+      tags:
+        - never
+        - clone_repo_dir
+
+    - name: Check whether repo already exists in parent clone path
+      ansible.builtin.stat:
+        path: "{{ repo_parent_dir }}/{{ repo_name }}/.git"
+      register: repo_dir_clone_git
+      changed_when: false
+      tags:
+        - never
+        - clone_repo_dir
+
+    - name: Clone repository into parent directory using repo name
+      ansible.builtin.command:
+        cmd: git clone {{ repo_url }}
+      args:
+        chdir: "{{ repo_parent_dir }}"
+      when: not repo_dir_clone_git.stat.exists
+      tags:
+        - never
+        - clone_repo_dir
+
+    - name: Set worktree path for clone_repo_dir workflow
+      ansible.builtin.set_fact:
+        repo_worktree: "{{ repo_parent_dir }}/{{ repo_name }}"
+      tags:
+        - never
+        - clone_repo_dir
+
+    - name: Print repo_worktree for clone_repo_dir workflow
+      ansible.builtin.debug:
+        msg:
+          - "repo_url: {{ repo_url }}"
+          - "repo_parent_dir: {{ repo_parent_dir }}"
+          - "repo_name: {{ repo_name }}"
+          - "repo_dest: {{ repo_dest }}"
+          - "default_branch: {{ default_branch }}"
+          - "remote_name: {{ remote_name }}"
+          - "branch_name: {{ branch_name }}"
+          - "files_to_stage: {{ files_to_stage }}"
+          - "commit_message: {{ commit_message | default('') }}"
+          - "repo_worktree: {{ repo_worktree }}"
+      tags:
+        - never
+        - clone_repo_dir
+
+    - name: Ensure destination directory exists for root clone
+      ansible.builtin.file:
+        path: "{{ repo_dest }}"
+        state: directory
+        mode: "0755"
+      tags:
+        - never
+        - clone_into_root
+
+    - name: Check whether repo already exists in root clone path
+      ansible.builtin.stat:
+        path: "{{ repo_dest }}/.git"
+      register: repo_root_clone_git
+      changed_when: false
+      tags:
+        - never
+        - clone_into_root
+
+    - name: Clone repository into current directory root
+      ansible.builtin.command:
+        cmd: git clone {{ repo_url }} .
+      args:
+        chdir: "{{ repo_dest }}"
+      when: not repo_root_clone_git.stat.exists
+      tags:
+        - never
+        - clone_into_root
+
+    - name: Set worktree path for clone_into_root workflow
+      ansible.builtin.set_fact:
+        repo_worktree: "{{ repo_dest }}"
+      tags:
+        - never
+        - clone_into_root
+
+    - name: Build candidate repo worktree paths
+      ansible.builtin.set_fact:
+        repo_worktree_candidates:
+          - "{{ repo_dest | regex_replace('/+$', '') }}"
+          - "{{ (repo_parent_dir | regex_replace('/+$', '')) ~ '/' ~ repo_name }}"
+      when: repo_worktree is not defined
+      tags:
+        - never
+        - configuration
+        - make_branch
+        - switch_pull
+        - switch_stage
+        - commit
+        - push
+
+    - name: Check candidate repo locations for existing .git directory
+      ansible.builtin.stat:
+        path: "{{ item }}/.git"
+      loop: "{{ repo_worktree_candidates }}"
+      register: repo_worktree_candidate_stats
+      changed_when: false
+      when: repo_worktree is not defined
+      tags:
+        - never
+        - configuration
+        - make_branch
+        - switch_pull
+        - switch_stage
+        - commit
+        - push
+
+    - name: Select repo worktree from detected repository path
+      ansible.builtin.set_fact:
+        repo_worktree: "{{ (repo_worktree_candidate_stats.results | selectattr('stat.exists') | map(attribute='item') | list | first) | default('') }}"
+      when: repo_worktree is not defined
+      tags:
+        - never
+        - configuration
+        - make_branch
+        - switch_pull
+        - switch_stage
+        - commit
+        - push
+
+    - name: Ensure repository exists before running git workflows
+      ansible.builtin.assert:
+        that:
+          - repo_worktree | length > 0
+        fail_msg: >-
+          No git repository found at repo_dest ({{ repo_dest }}) or repo_parent_dir/repo_name
+          ({{ repo_parent_dir }}/{{ repo_name }}). Run clone workflow first or fix vars.
+      tags:
+        - never
+        - configuration
+        - make_branch
+        - switch_pull
+        - switch_stage
+        - commit
+        - push
+
+    - name: Read current branch in repository
+      ansible.builtin.command:
+        cmd: git branch --show-current
+      args:
+        chdir: "{{ repo_worktree | default(repo_dest) }}"
+      register: current_branch
+      changed_when: false
+      tags:
+        - never
+        - configuration
+        - make_branch
+        - switch_pull
+        - switch_stage
+        - commit
+        - push
+
+    - name: Check whether local target branch exists
+      ansible.builtin.command:
+        cmd: git show-ref --verify --quiet refs/heads/{{ branch_name }}
+      args:
+        chdir: "{{ repo_worktree | default(repo_dest) }}"
+      register: local_branch_exists
+      changed_when: false
+      failed_when: local_branch_exists.rc not in [0, 1]
+      tags:
+        - never
+        - configuration
+        - make_branch
+        - switch_pull
+        - switch_stage
+        - commit
+        - push
+
+    - name: Read effective git configuration in repository
+      ansible.builtin.command:
+        cmd: git config --list
+      args:
+        chdir: "{{ repo_worktree | default(repo_dest) }}"
+      register: git_config_list
+      changed_when: false
+      tags:
+        - never
+        - configuration
+
+    - name: Read branch information in repository
+      ansible.builtin.command:
+        cmd: git branch --all --verbose
+      args:
+        chdir: "{{ repo_worktree | default(repo_dest) }}"
+      register: git_branch_list
+      changed_when: false
+      tags:
+        - never
+        - configuration
+
+    - name: Read remote information in repository
+      ansible.builtin.command:
+        cmd: git remote -v
+      args:
+        chdir: "{{ repo_worktree | default(repo_dest) }}"
+      register: git_remote_list
+      changed_when: false
+      tags:
+        - never
+        - configuration
+
+    - name: Read local branches (brief)
+      ansible.builtin.command:
+        cmd: git branch
+      args:
+        chdir: "{{ repo_worktree | default(repo_dest) }}"
+      register: git_local_branches_brief
+      changed_when: false
+      tags:
+        - never
+        - configuration
+
+    - name: Read remote branches (brief)
+      ansible.builtin.command:
+        cmd: git branch -r
+      args:
+        chdir: "{{ repo_worktree | default(repo_dest) }}"
+      register: git_remote_branches_brief
+      changed_when: false
+      tags:
+        - never
+        - configuration
+
+    - name: Show git repository configuration summary
+      ansible.builtin.debug:
+        msg: |
+
+          ── git config --list ──────────────────────────────────────
+          {{ git_config_list.stdout }}
+
+          ── git branch --all --verbose ─────────────────────────────
+          {{ git_branch_list.stdout }}
+
+          ── git remote -v ──────────────────────────────────────────
+          {{ git_remote_list.stdout }}
+
+          ── Local Branches (brief) ─────────────────────────────
+          {{ git_local_branches_brief.stdout }}
+
+          ── Remote Branches (brief) ────────────────────────────
+          {{ git_remote_branches_brief.stdout }}
+
+          ── status ─────────────────────────────────────────────────
+          current branch        : {{ current_branch.stdout | default('(none)') }}
+          target branch         : {{ branch_name }}
+          target exists locally : {{ local_branch_exists.rc | default(1) == 0 }}
+      tags:
+        - never
+        - configuration
+
+    - name: Check if remote branch already exists
+      ansible.builtin.command:
+        cmd: git ls-remote --heads {{ remote_name }} {{ branch_name }}
+      args:
+        chdir: "{{ repo_worktree | default(repo_dest) }}"
+      register: remote_branch_check
+      changed_when: false
+      tags:
+        - never
+        - make_branch
+        - switch_pull
+        - switch_stage
+        - commit
+        - push
+
+    - name: Switch to existing local target branch
+      ansible.builtin.command:
+        cmd: git switch {{ branch_name }}
+      args:
+        chdir: "{{ repo_worktree | default(repo_dest) }}"
+      when:
+        - current_branch.stdout != branch_name
+        - local_branch_exists.rc == 0
+      tags:
+        - never
+        - make_branch
+        - switch_pull
+        - switch_stage
+        - commit
+        - push
+
+    - name: Create and track remote target branch
+      ansible.builtin.command:
+        cmd: git switch --track -c {{ branch_name }} {{ remote_name }}/{{ branch_name }}
+      args:
+        chdir: "{{ repo_worktree | default(repo_dest) }}"
+      when:
+        - current_branch.stdout != branch_name
+        - local_branch_exists.rc != 0
+        - remote_branch_check.stdout | length > 0
+      tags:
+        - never
+        - make_branch
+        - switch_pull
+        - switch_stage
+        - commit
+        - push
+
+    - name: Create new local target branch when remote branch does not exist
+      ansible.builtin.command:
+        cmd: git switch -c {{ branch_name }}
+      args:
+        chdir: "{{ repo_worktree | default(repo_dest) }}"
+      when:
+        - current_branch.stdout != branch_name
+        - local_branch_exists.rc != 0
+        - remote_branch_check.stdout | length == 0
+      tags:
+        - never
+        - make_branch
+        - switch_pull
+        - switch_stage
+        - commit
+        - push
+
+    - name: Pull latest code from branch
+      ansible.builtin.command:
+        cmd: git pull --ff-only {{ remote_name }} {{ branch_name }}
+      args:
+        chdir: "{{ repo_worktree | default(repo_dest) }}"
+      when: remote_branch_check.stdout | length > 0
+      tags:
+        - never
+        - switch_pull
+
+    - name: Add files to staging area
+      ansible.builtin.command:
+        cmd: git add {{ files_to_stage }}
+      args:
+        chdir: "{{ repo_worktree | default(repo_dest) }}"
+      tags:
+        - never
+        - switch_stage
+
+    - name: Check whether staged changes exist
+      ansible.builtin.command:
+        cmd: git diff --cached --quiet
+      args:
+        chdir: "{{ repo_worktree | default(repo_dest) }}"
+      register: staged_changes
+      failed_when: staged_changes.rc not in [0, 1]
+      changed_when: staged_changes.rc == 1
+      tags:
+        - never
+        - commit
+
+    - name: Prompt for commit message when not provided
+      ansible.builtin.pause:
+        prompt: "Enter commit message"
+      register: commit_message_prompt
+      when:
+        - staged_changes.rc == 1
+        - commit_message | default('') | trim | length == 0
+      tags:
+        - never
+        - commit
+
+    - name: Build effective commit message
+      ansible.builtin.set_fact:
+        commit_message_effective: >-
+          {{ (commit_message | default('') | trim)
+             if (commit_message | default('') | trim | length > 0)
+             else (commit_message_prompt.user_input | trim) }}
+      when: staged_changes.rc == 1
+      tags:
+        - never
+        - commit
+
+    - name: Validate effective commit message is not empty
+      ansible.builtin.assert:
+        that:
+          - commit_message_effective | length > 0
+        fail_msg: Commit message cannot be empty.
+      when: staged_changes.rc == 1
+      tags:
+        - never
+        - commit
+
+    - name: Commit staged changes
+      ansible.builtin.command:
+        cmd: git commit -m "{{ commit_message_effective }}"
+      args:
+        chdir: "{{ repo_worktree | default(repo_dest) }}"
+      when: staged_changes.rc == 1
+      tags:
+        - never
+        - commit
+
+    - name: Push branch to remote
+      ansible.builtin.command:
+        cmd: git push {{ remote_name }} HEAD:{{ branch_name }}
+      args:
+        chdir: "{{ repo_worktree | default(repo_dest) }}"
+      tags:
+        - never
+        - push
+

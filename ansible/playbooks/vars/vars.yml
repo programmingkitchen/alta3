@@ -1,15 +1,17 @@
-repo_url: "https://github.com/example/example-repo.git"
-repo_dest: "/tmp/example-repo"
+repo_url: "git@github.com:programmingkitchen/alta3.git"
+repo_dest: "/home/student/alta3/"
+repo_parent_dir: "/home/student/alta3/"
 
 # Branch used for checkout/create, pull, and push.
-branch_name: "feature/update-files"
+branch_name: "feat/lab23"
 
 # Branch used when initially cloning the repository.
 default_branch: "main"
 
 remote_name: "origin"
 files_to_stage: "."
-commit_message: "Update files from Ansible automation"
+commit_message: "DEFAULT COMMIT MESSAGE: changes to source control management playbook."
 
-git_user_name: "Your Name"
-git_user_email: "you@example.com"
+# Directory copy variables used by copy-dir.yml
+source_dir: "/tmp/source_dir"
+dest_dir: "/tmp/target_dir"

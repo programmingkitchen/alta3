@@ -1,0 +1,16 @@
+- hosts: fry
+  tasks:
+    - name: Create directory for favorite ice cream
+      file:
+        path: "/tmp/{{ fav_icecream }}"
+        state: directory
+
+    - name: Create directory for favorite movie
+      file:
+        path: "/tmp/{{ fav_movie }}"
+        state: directory
+
+    - name: Create directory for favorite color
+      file:
+        path: "/tmp/{{ fav_color }}"
+        state: directory

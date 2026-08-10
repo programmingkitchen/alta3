@@ -1,0 +1,23 @@
+- hosts: localhost
+  tasks:
+    - name: Loop over names
+      debug:
+        msg: # FIX THIS LINE!
+             # Recommended output: "Marty McFly is a classic character!"
+             #                     "Doc Brown is a classic character!"
+             #                     "Biff Tannen is is a classic character!"
+      loop:
+        - Marty McFly
+        - Doc Brown
+        - Biff Tannen
+
+    - name: Loop over items with keys
+      debug:
+        msg: # FIX THIS LINE!
+             # Recommended output: "Marty McFly is known for hoverboards!"
+             #                     "Doc Brown is known for DeLoreans!"
+             #                     "Biff Tannen is known for manure!"
+      loop:
+        - { character: "Marty McFly", object: "hoverboards" }
+        - { character: "Doc Brown", object: "DeLoreans" }
+        - { character: "Biff Tannen", object: "manure" }

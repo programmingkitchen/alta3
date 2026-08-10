@@ -17,3 +17,4 @@
     - name: Display specific parts of the output
       debug:
         msg: "The task changed: {{ apt_result.changed }}"
+

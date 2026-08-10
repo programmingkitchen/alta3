@@ -1,0 +1,17 @@
+- hosts: localhost
+  tasks:
+    - name: Loop over names
+      debug:
+        msg: "{{ item }} is a classic character!"
+      loop:
+        - Marty McFly
+        - Doc Brown
+        - Biff Tannen
+
+    - name: Loop over items with keys
+      debug:
+        msg: "{{ item.character }} is known for {{ item.object }}!"
+      loop:
+        - { character: "Marty McFly", object: "hoverboards" }
+        - { character: "Doc Brown", object: "DeLoreans" }
+        - { character: "Biff Tannen", object: "manure" }

@@ -1,0 +1,11 @@
+- hosts: localhost
+  tasks:
+    - name: Print quote 1
+      debug:
+        msg: "Roads? Where we're going, we don't need roads."
+    - name: Print quote 2
+      debug:
+        msg: "If my calculations are correct, when this baby hits 88 miles per hour, you're gonna see some serious stuff."
+    - name: Print quote 3
+      debug:
+        msg: "Your future is whatever you make it, so make it a good one."

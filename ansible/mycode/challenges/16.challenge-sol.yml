@@ -1,0 +1,12 @@
+---
+- name: How to prompt for variables
+  hosts: professors     # connect to the professors group
+  gather_facts: no
+
+  vars_prompt:
+    - name: "ansible_ssh_pass"  # password to connect to the hosts in the professors group
+      prompt: "What is your ssh password?"  # Question to ask
+      private: yes  # Do not display input
+      confirm: yes  # Require confirmation
+
+

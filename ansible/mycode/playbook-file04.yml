@@ -1,0 +1,24 @@
+---
+- name: A playbook showing the file module
+  hosts: planetexpress
+  connection: ansible.builtin.ssh
+  gather_facts: yes
+
+  tasks:
+   - name: Create directory where Space Station documents will reside
+     become_user: root
+     become: true
+     ansible.builtin.file:
+        # the var "ansible_user" is a host variable AND connection variable
+        path: "/home/{{ ansible_user }}/station_docs/"
+        state: directory
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: "0755"
+
+   - name: "Copy content into a file with the year-mo-day"
+     ansible.builtin.copy:
+        # the var "ansible_user" is a host variable AND connection variable
+        # ansible_date_time.date is defined by gather_facts
+        dest: "/home/{{ ansible_user }}/station_docs/navdata-{{ ansible_date_time.date }}.txt"
+        content: "Earth\nMars\nSaturn\nEuropa\n"

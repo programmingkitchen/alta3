@@ -1,0 +1,9 @@
+- hosts: localhost
+  tasks:
+    - name: Print quotes
+      debug:
+        msg: "{{ item }}"
+      loop:
+        - "Roads? Where we're going, we don't need roads."
+        - "If my calculations are correct, when this baby hits 88 miles per hour, you're gonna see some serious stuff."
+        - "Your future is whatever you make it, so make it a good one."

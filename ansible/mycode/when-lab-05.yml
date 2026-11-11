@@ -1,0 +1,13 @@
+---
+- name: Check for truthy flag
+  hosts: localhost
+  gather_facts: no
+
+  vars:
+    enable_feature_flag: true
+
+  tasks:
+    - name: Execute feature task
+      debug:
+        msg: "Feature is enabled!"
+      when: enable_feature_flag is truthy

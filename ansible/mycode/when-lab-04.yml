@@ -1,0 +1,17 @@
+---
+- name: Dynamically define backup path
+  hosts: localhost
+  gather_facts: yes
+
+  tasks:
+    - name: Set backup path if production server
+      set_fact:
+        backup_path: "{{ '/var/backups' if ansible_hostname == 'prod-server' else '' }}"
+        # TRANSLATION: "If the server's hostname is 'prod-server,' set the
+        # backup path to /var/backups; otherwise, leave it empty."
+
+    - name: Create backup directory if path is valid
+      file:
+        path: "{{ backup_path }}"
+        state: directory
+      when: backup_path is defined and backup_path != ""

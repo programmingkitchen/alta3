@@ -1,0 +1,9 @@
+---
+- name: Challenge!
+  hosts: farnsworth
+  gather_facts: no
+
+  vars_prompt:
+    - name: "ansible_ssh_pass"  # password to connect to farnsworth
+      prompt: "What is your ssh password?"
+

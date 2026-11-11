@@ -1,0 +1,17 @@
+---
+- name: Install only if not in the package list
+  hosts: planetexpress
+  gather_facts: yes
+
+  vars:
+    installed_packages:
+      - apache2
+      - mysql
+
+  tasks:
+    - name: Ensure sl is installed
+      ansible.builtin.apt:
+        name: sl
+        state: present
+      become: yes
+      when: "'sl' not in installed_packages"

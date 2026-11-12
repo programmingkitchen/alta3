@@ -1,5 +1,7 @@
 # ALTA 3 TRAINING AND CODE
 
+# test from vm
+
 ## Revision history
 
 | Date | Details |

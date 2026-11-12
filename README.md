@@ -1,7 +1,5 @@
 # ALTA 3 TRAINING AND CODE
 
-# test from vm
-
 ## Revision history
 
 | Date | Details |
@@ -85,4 +83,25 @@ Switched to a new branch 'feat/cka-start'
 student@bchd:~/git/alta3$ pwd
 /home/student/git/alta3
 student@bchd:~/git/alta3$ 
+
+### Do the config
+
+student@bchd:~/git/alta3$ git commit -m "Test from Alta3 VM"
+Author identity unknown
+
+*** Please tell me who you are.
+
+Run
+
+  git config --global user.email "you@example.com"
+  git config --global user.name "Your Name"
+
+to set your account's default identity.
+Omit --global to set the identity only in this repository.
+
+fatal: empty ident name (for <student@bchd.bc31dbc9b91b8879>) not allowed
+student@bchd:~/git/alta3$ 
+
+git config --global user.email "rgranier@gmail.com"
+git config --global user.name "Randall @ Alta3 VM"
 
